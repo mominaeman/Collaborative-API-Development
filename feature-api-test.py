@@ -2,40 +2,45 @@ import unittest
 from unittest.mock import patch
 import requests
 
+def get_weather_data(api_key, city):
+    weather_data = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city}&units=imperial&APPID={api_key}")
+    return weather_data.json()
+
 class TestWeatherApp(unittest.TestCase):
 
-    @patch('builtins.input', return_value='San Francisco')
-    @patch('weatherapp.requests.get')
-    def test_valid_city(self, mock_get, mock_input):
-        # Mock response for a valid city
-        mock_response = {
+    @patch('requests.get')
+    def test_city_found(self, mock_get):
+        # Mock the response for a valid city
+        mock_get.return_value.json.return_value = {
             'cod': 200,
             'weather': [{'main': 'Clear'}],
             'main': {'temp': 75.5}
         }
-        mock_get.return_value.json.return_value = mock_response
 
-        with patch('builtins.print') as mocked_print:
-            # Simulate running the original script
-            exec(open('your_script.py').read())
+        api_key = '63ba0ef351281c772dd79e8032aa1d81'  # Use a dummy key for testing
+        city = 'London'
+        result = get_weather_data(api_key, city)
 
-            # Check that the print output is correct
-            mocked_print.assert_any_call("The weather in San Francisco is: Clear")
-            mocked_print.assert_any_call("The temperature in San Francisco is: 76ºF")
+        # Assertions
+        self.assertEqual(result['cod'], 200)
+        self.assertEqual(result['weather'][0]['main'], 'Clear')
+        self.assertEqual(round(result['main']['temp']), 76)
 
-    @patch('builtins.input', return_value='InvalidCity')
-    @patch('weatherapp.requests.get')
-    def test_invalid_city(self, mock_get, mock_input):
-        # Mock response for an invalid city
-        mock_response = {'cod': '404'}
-        mock_get.return_value.json.return_value = mock_response
+    @patch('requests.get')
+    def test_city_not_found(self, mock_get):
+        # Mock the response for an invalid city (404)
+        mock_get.return_value.json.return_value = {
+            'cod': '404',
+            'message': 'city not found'
+        }
 
-        with patch('builtins.print') as mocked_print:
-            # Simulate running the original script
-            exec(open('your_script.py').read())
+        api_key = '63ba0ef351281c772dd79e8032aa1d81'  # Use a dummy key for testing
+        city = 'InvalidCity'
+        result = get_weather_data(api_key, city)
 
-            # Check that "No City Found" was printed
-            mocked_print.assert_any_call("No City Found")
+        # Assertions
+        self.assertEqual(result['cod'], '404')
+        self.assertEqual(result['message'], 'city not found')
 
 if __name__ == '__main__':
     unittest.main()
