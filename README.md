@@ -112,7 +112,7 @@ Returns weather information in the following format: city, description, temperat
 
 ## Merging:
 
-![image](https://github.com/user-attachments/assets/b87d3586-62e5-4077-9969-7c2fb8e858f9)
+![image](https://github.com/user-attachments/assets/1acfd7b2-f1a9-47a0-94b4-8719d16caef2)
 
 ## Testing:
 
